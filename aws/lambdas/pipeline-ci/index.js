@@ -4,8 +4,9 @@ const codePipeline = new AWS.CodePipeline()
 const { CodePipelineClient, StartPipelineExecutionCommand} = require("@aws-sdk/client-codepipeline");
 
 const region = "eu-west-1";
-const secretName = "github/webhooks/mfe-pipeline";
-let secret;
+// const secretName = "github/webhooks/mfe-pipeline";
+// let secret;
+const secret = "poc-frontend-github"
 let decodedBinarySecret;
 
 
@@ -13,24 +14,24 @@ const client = new CodePipelineClient({
     region: region
 });
 
-var clientSecretManager = new AWS.SecretsManager({
-    region: region
-});
+// var clientSecretManager = new AWS.SecretsManager({
+//     region: region
+// });
 
 exports.handler = async (event) => {
-    let secret;
-    try {
-        const response = await clientSecretManager.getSecretValue({SecretId: secretName}).promise();
-        secret = JSON.parse(response.SecretString)["GITHUB_WEBHOOK_SECRET"];
-        console.log("SSSSSS", response.SecretString);
-         console.log("SSSSS22S", secret);
-    } catch (e) {
-        console.log(e);
-        return {
-            statusCode: 401,
-            body: JSON.stringify('Could not get secret.'),
-        };
-    }
+    // let secret;
+    // try {
+    //     const response = await clientSecretManager.getSecretValue({SecretId: secretName}).promise();
+    //     secret = JSON.parse(response.SecretString)["GITHUB_WEBHOOK_SECRET"];
+    //     console.log("SSSSSS", response.SecretString);
+    //     console.log("SSSSS22S", secret);
+    // } catch (e) {
+    //     console.log(e);
+    //     return {
+    //         statusCode: 401,
+    //         body: JSON.stringify('Could not get secret.'),
+    //     };
+    // }
 
 
     const isValid = validateGitHubAuthentication(event, secret);
@@ -45,6 +46,9 @@ exports.handler = async (event) => {
 
     const microFrontendNames = findMicroFrontendNames( body["commits"][0]);
 
+    console.log("Micro are...")
+    console.log(microFrontendNames)
+
     if (!microFrontendNames || !microFrontendNames.length) {
         return {
             statusCode: 404,
@@ -52,20 +56,20 @@ exports.handler = async (event) => {
         };
     }
 
-    const codePipelinePromises = [];
+    // const codePipelinePromises = [];
 
-    microFrontendNames.forEach(microFrontendName => {
-        const params = {
-          name: microFrontendName
-        };
+    // microFrontendNames.forEach(microFrontendName => {
+    //     const params = {
+    //       name: microFrontendName
+    //     };
 
-        const command = new StartPipelineExecutionCommand(params);
+    //     const command = new StartPipelineExecutionCommand(params);
 
-        codePipelinePromises.push(client.send(command));
-    });
+    //     codePipelinePromises.push(client.send(command));
+    // });
 
-    const result = await Promise.allSettled(codePipelinePromises);
-
+    // const result = await Promise.allSettled(codePipelinePromises);
+    const result = "done"
     console.log("Response was: ", result);
     return {
          statusCode: 200,
